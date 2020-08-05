@@ -1,4 +1,4 @@
-# mdm-plugin-template Repository
+# mdm-plugin-template
 
 ## How to use
 
@@ -7,12 +7,14 @@
 $ git clone git@github.com:MauroDataMapper-Plugins/mdm-plugin-template.git mdm-plugin-NAME_OF_PLUGIN
 ```
 * Remove this section of the README and update `NAME_OF_PLUGIN` in the markdown template below
+* Set `rootProject.name` in `settings.gradle` to `mdm-plugin-NAME_OF_PLUGIN`
 * Create your code package, if the plugin will be published inside Mauro Data Mapper Plugins organisation then the package MUST be
 `uk.ac.ox.softeng.maurodatamapper.plugins.your.plugin.name`
 * Refactor `uk.ac.ox.softeng.maurodatamapper.plugins.template.TemplatePlugin` to be `YourPluginNamePlugin` in the correct package
 * Update `src/main/resources/META-INF/services/uk.ac.ox.softeng.maurodatamapper.provider.plugin.MauroDataMapperPlugin` to hold the FQN for your plugin
 class
 * Write all your code and tests
+* Declare your `mainClass` and `applicationScriptName` in `gradle.properties` (see other plugins for examples)
 
 ### AbstractMauroDataMapperPlugin
 
@@ -42,7 +44,7 @@ The closure is passed to `grails.spring.BeanBuilder`.
 
 ## Requirements
 
-* Java 12 (Java.net)
+* Java 12 (AdoptOpenJDK)
 * Grails 4.0.3+
 * Gradle 6.5+
 
