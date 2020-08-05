@@ -11,8 +11,8 @@ $ git clone git@github.com:MauroDataMapper-Plugins/mdm-plugin-template.git mdm-p
 * Create your code package, if the plugin will be published inside Mauro Data Mapper Plugins organisation then the package MUST be
 `uk.ac.ox.softeng.maurodatamapper.plugins.your.plugin.name`
 * Refactor `uk.ac.ox.softeng.maurodatamapper.plugins.template.TemplatePlugin` to be `YourPluginNamePlugin` in the correct package
-* Update `src/main/resources/META-INF/services/uk.ac.ox.softeng.maurodatamapper.provider.plugin.MauroDataMapperPlugin` to hold the FQN for your plugin
-class
+* Update `src/main/resources/META-INF/services/uk.ac.ox.softeng.maurodatamapper.provider.plugin.MauroDataMapperPlugin` to hold the fully qualified
+ name of your plugin class
 * Write all your code and tests
 * Declare your `mainClass` and `applicationScriptName` in `gradle.properties` (see other plugins for examples)
 
