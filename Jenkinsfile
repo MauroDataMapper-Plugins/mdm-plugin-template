@@ -1,12 +1,17 @@
 pipeline {
     agent any
 
+    environment {
+        JENKINS = 'true'
+    }
+
     tools {
         jdk 'jdk-12'
     }
 
     options {
         timestamps()
+        timeout(time: 30, unit: 'MINUTES')
         skipStagesAfterUnstable()
         buildDiscarder(logRotator(numToKeepStr: '30'))
     }
@@ -25,88 +30,68 @@ pipeline {
             }
         }
 
-        stage('Compile') {
+        stage('Info') {
             steps {
                 sh './gradlew -v' // Output gradle version for verification checks
-                sh "./gradlew jenkinsClean compile"
+                sh './gradlew jvmArgs sysProps'
+                sh './grailsw -v' // Output grails version for verification checks
+            }
+        }
+
+        stage('Test cleanup & Compile') {
+            steps {
+                sh "./gradlew jenkinsClean"
+                sh './gradlew compile'
+            }
+        }
+
+        stage('License Header Check') {
+            steps {
+                warnError('Missing License Headers') {
+                    sh './gradlew --build-cache license'
+                }
+            }
+        }
+
+        stage('Unit Test') {
+
+            steps {
+                sh "./grailsw test-app -unit"
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'build/test-results/test/*.xml'
+                    publishHTML([
+                        allowMissing         : false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true,
+                        reportDir            : 'build/reports/tests',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Test Report',
+                        reportTitles         : 'Test'
+                    ])
+                }
             }
         }
 
         stage('Integration Test') {
-            steps {
-                script {
-                    def outputTestFolder = uk.ac.ox.ndm.jenkins.Utils.generateRandomTestFolder()
-                    def port = uk.ac.ox.ndm.jenkins.Utils.findFreeTcpPort()
 
-                    sh "./gradlew " +
-                       "-Dhibernate.search.default.indexBase=${outputTestFolder} " +
-                       "-Dserver.port=${port} " +
-                       "integrationTest"
-                }
+            steps {
+                sh "./grailsw test-app -integration"
             }
             post {
                 always {
+                    junit allowEmptyResults: true, testResults: 'build/test-results/integrationTest/*.xml'
                     publishHTML([
-                            allowMissing         : false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll              : true,
-                            reportDir            : 'build/reports/tests/integrationTest',
-                            reportFiles          : 'index.html',
-                            reportName           : 'Integration Test Report',
-                            reportTitles         : 'Test'
-                    ])
-                    junit allowEmptyResults: true, testResults: '**/build/test-results/**/*.xml'
-                    outputTestResults()
-                }
-            }
-        }
-
-        stage('Jacoco Report') {
-            steps {
-                sh "./gradlew jacocoTestReport"
-            }
-            post {
-                always {
-                    jacoco execPattern: '**/build/jacoco/*.exec'
-                    publishHTML([
-                            allowMissing         : false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll              : true,
-                            reportDir            : 'build/reports/jacoco/test/html',
-                            reportFiles          : 'index.html',
-                            reportName           : 'Coverage Report (Gradle)',
-                            reportTitles         : 'Jacoco Coverage'
+                        allowMissing         : false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll              : true,
+                        reportDir            : 'build/reports/tests',
+                        reportFiles          : 'index.html',
+                        reportName           : 'Test Report',
+                        reportTitles         : 'Test'
                     ])
                 }
-            }
-        }
-
-//        stage('Static Code Analysis') {
-//            steps {
-//                sh "./gradlew -PciRun=true staticCodeAnalysis"
-//            }
-//            post {
-//                always {
-//                    checkstyle canComputeNew: false, defaultEncoding: '', healthy: '0', pattern: '**/build/reports/checkstyle/*.xml', unHealthy: ''
-//                    findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '0', includePattern: '', pattern:'**/build/reports/spotbugs/*.xml', unHealthy: ''
-//                    pmd canComputeNew: false, defaultEncoding: '', healthy: '0', pattern: '**/build/reports/pmd/*.xml', unHealthy: ''
-//                    publishHTML(
-//                        target: [
-//                            allowMissing         : false,
-//                            alwaysLinkToLastBuild: false,
-//                            keepAll              : true,
-//                            reportDir            : 'build/reports/codenarc',
-//                            reportFiles          : 'main.html',
-//                            reportName           : "Codenarc Report"
-//                        ]
-//                    )
-//                }
-//            }
-//        }
-
-        stage('License Header Check'){
-            steps{
-                sh './gradlew license'
             }
         }
 
@@ -133,6 +118,9 @@ pipeline {
 
     post {
         always {
+            outputTestResults()
+            jacoco execPattern: '**/build/jacoco/*.exec'
+            archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
             slackNotification()
         }
     }

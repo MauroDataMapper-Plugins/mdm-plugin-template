@@ -15,21 +15,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package uk.ac.ox.softeng.maurodatamapper.plugins.template
+package uk.ac.ox.softeng.maurodatamapper.plugins
 
-import uk.ac.ox.softeng.maurodatamapper.provider.plugin.AbstractMauroDataMapperPlugin
+class BootStrap {
 
-class TemplatePlugin extends AbstractMauroDataMapperPlugin {
-
-    @Override
-    String getName() {
-        'Plugin : XXXXXXX'
+    def init = {servletContext ->
     }
-
-    @Override
-    Closure doWithSpring() {
-        {->
-            // This closure will be passed to grails.spring.BeanBuilder
-        }
+    def destroy = {
     }
 }
