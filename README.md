@@ -1,11 +1,16 @@
 # mdm-plugin-template
 
+This is a base template to create a gradle based plugin for MDM. The preferred method is to create a grails based plugin using the `grails-plugin-template` branch of this
+repository.
+
 ## How to use
 
 * Clone this repository to a new folder
+
 ```bash
 $ git clone git@github.com:MauroDataMapper-Plugins/mdm-plugin-template.git mdm-plugin-NAME_OF_PLUGIN
 ```
+
 * Remove this section of the README and update `NAME_OF_PLUGIN` in the markdown template below
 * Set `rootProject.name` in `settings.gradle` to `mdm-plugin-NAME_OF_PLUGIN`
 * Create your code package, if the plugin will be published inside Mauro Data Mapper Plugins organisation then the package MUST be
